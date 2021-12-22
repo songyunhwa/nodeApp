@@ -3,18 +3,19 @@ const cookieParser=require('cookie-parser');
 const morgan =require('morgan');
 const path=require('path');
 const session=require('express-session');
-const nunjucks = requres('nunjucks');
-const dotenv=requres('dotenv');
+//const nunjucks = require('nunjucks');
+const dotenv=require('dotenv');
 
 const app = express();
-app.set('port', precess.env.PORT || 8081);
+app.set('port', process.env.PORT || 8081);
 app.set('view engine', 'html');
+/*
 nunjucks.configure('views', {
     express: app,
     watch: true
-})
+})*/
 
-app.use(express.static(path.join(_dirname, 'public')));//static파일경로
+app.use(express.static(path.join(__dirname, 'public')));//static파일경로
 app.use(express.json());
 //json으로 이루어진 request body 받을 수 있도록
 app.use(express.urlencoded({extended: false}));
@@ -30,7 +31,7 @@ app.use(session({
     }
 }));
 
-constpageRouter = require('./routes/page');
+const pageRouter = require('./routes/page');
 app.use('/', pageRouter);
 
 app.use((req, res, next) => {
@@ -51,4 +52,13 @@ app.use((err, req, res, next) => {
 app.listen(app.get('port'), () => {
     console.log(app.get('port'), '번 포트에서 대기 중');
 
+});
+
+const {sequelize} = require('./models');
+sequelize.sync({force: false})
+.then(()=> {
+    console.log("db connection success");
+})
+.catch((err)=> {
+    console.log(err);
 });
