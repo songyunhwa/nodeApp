@@ -5,6 +5,9 @@ const path=require('path');
 const session=require('express-session');
 //const nunjucks = require('nunjucks');
 const dotenv=require('dotenv');
+const passwort =require('passport'); // 로그인 검증된 모듈
+const passsportConfig = require('./passport');
+passsportConfig();
 
 const app = express();
 app.set('port', process.env.PORT || 8081);
@@ -30,6 +33,8 @@ app.use(session({
         secure: false,
     }
 }));
+app.use(passport.initialize());
+app.use(passport.session());
 
 const pageRouter = require('./routes/page');
 app.use('/', pageRouter);
