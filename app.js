@@ -5,15 +5,17 @@ const path=require('path');
 const session=require('express-session');
 //const nunjucks = require('nunjucks');
 const dotenv=require('dotenv');
-
+const pageRouter = require('./routes/page');
+const cors = require('@koa/cors'); 
 const app = express();
+
+
+dotenv.config(); // 현재 디렉토리 위치한 환경변수 읽어냄.
+
+
 app.set('port', process.env.PORT || 8081);
 app.set('view engine', 'html');
-/*
-nunjucks.configure('views', {
-    express: app,
-    watch: true
-})*/
+
 
 app.use(express.static(path.join(__dirname, 'public')));//static파일경로
 app.use(express.json());
@@ -31,16 +33,8 @@ app.use(session({
     }
 }));
 
-const pageRouter = require('./routes/page');
+
 app.use('/', pageRouter);
-
-app.use((req, res, next) => {
-    const error = new Error('${req.method} ${req.url} 라우터가 없습니다.');
-    error.status =404;
-    next(error);
-});
-
-dotenv.config(); // 현재 디렉토리 위치한 환경변수 읽어냄.
 
 app.use((err, req, res, next) => {
     res.locals.message = err.message;
@@ -62,3 +56,42 @@ sequelize.sync({force: false})
 .catch((err)=> {
     console.log(err);
 });
+
+/* CORS 허용 */
+app.proxy = true; // true 일때 proxy 헤더들을 신뢰함
+app.use(cors());
+const options = {
+    cors: {
+    origin: ['http://localhost:3000'],
+    methods: ['GET', 'POST'],
+    },
+};
+
+//socket 설정
+const httpServer = require('http').createServer();
+const io = require('socket.io')(httpServer, options);
+
+io.on("connection", (socket) => {      
+  console.log("connection success");
+
+  socket.on('join', (room, user) => {
+    onJoin(socket, room, user);
+});
+
+socket.on('message', (room, data) => {
+    io.sockets.in(room).emit("message", { data: data }); 
+});
+});
+
+
+function onJoin(socket, room, user) {
+    console.log("Joining room: " + room);
+    socket.join(room);
+    console.log(user + "( " + socket.id + ")" + " now in " + room);
+
+    io.sockets.in(room).emit("message", { data: user + " came in." }); 
+
+}
+
+
+httpServer.listen(4042);
