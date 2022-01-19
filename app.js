@@ -5,18 +5,17 @@ const path=require('path');
 const session=require('express-session');
 //const nunjucks = require('nunjucks');
 const dotenv=require('dotenv');
-const passwort =require('passport'); // 로그인 검증된 모듈
-const passsportConfig = require('./passport');
-passsportConfig();
-
+const pageRouter = require('./routes/page');
+const cors = require('@koa/cors'); 
 const app = express();
+
+
+dotenv.config(); // 현재 디렉토리 위치한 환경변수 읽어냄.
+
+
 app.set('port', process.env.PORT || 8081);
 app.set('view engine', 'html');
-/*
-nunjucks.configure('views', {
-    express: app,
-    watch: true
-})*/
+
 
 app.use(express.static(path.join(__dirname, 'public')));//static파일경로
 app.use(express.json());
@@ -33,19 +32,11 @@ app.use(session({
         secure: false,
     }
 }));
-app.use(passport.initialize());
-app.use(passport.session());
+//app.use(passport.initialize());
+//app.use(passport.session());
 
-const pageRouter = require('./routes/page');
+
 app.use('/', pageRouter);
-
-app.use((req, res, next) => {
-    const error = new Error('${req.method} ${req.url} 라우터가 없습니다.');
-    error.status =404;
-    next(error);
-});
-
-dotenv.config(); // 현재 디렉토리 위치한 환경변수 읽어냄.
 
 app.use((err, req, res, next) => {
     res.locals.message = err.message;
@@ -67,3 +58,45 @@ sequelize.sync({force: false})
 .catch((err)=> {
     console.log(err);
 });
+
+/* CORS 허용 */
+app.proxy = true; // true 일때 proxy 헤더들을 신뢰함
+app.use(cors());
+const options = {
+    cors: {
+    origin: ['http://localhost:3000'],
+    methods: ['GET', 'POST'],
+    },
+};
+
+//socket 설정
+const httpServer = require('http').createServer();
+const io = require('socket.io')(httpServer, options);
+
+app.set('io');
+const root = io.of('/root');
+const chat = io.of('/chat');
+
+io.on("connection", (socket) => {      
+  console.log("connection success");
+
+  socket.on('join', (user) => {
+    onJoin(socket, user);
+});
+
+});
+
+
+function onJoin(socket, user) {
+    const { headers: {referer}} = req;
+    const id = referer.split('/')[referer.split('/').length()-1].replace(/\?.+/, '');
+    console.log("Joining room: " + id);
+    socket.join(id);
+    console.log(user + "( " + socket.id + ")" + " now in " + room + " " + id);
+
+    io.sockets.in(id).emit("message", { data: user + " came in." }); 
+
+}
+
+
+httpServer.listen(4042);
