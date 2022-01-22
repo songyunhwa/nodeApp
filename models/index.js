@@ -1,8 +1,8 @@
+
 const Sequelize = require('sequelize');
 const config=require('../config/config.json')['development'];
 const User=require('./user');
-const Post = require('./post');
-const Hashtag = require('./hashtag');
+const ChatRoom = require('./chatRoom');
 
 const db = {};
 const sequelize = new Sequelize(
@@ -11,14 +11,12 @@ const sequelize = new Sequelize(
 
 db.sequelize = sequelize;
 db.User = User;
-db.Post = Post;
-db.Hashtag = Hashtag;
+db.ChatRoom = ChatRoom;
 
 User.init(sequelize);
-Post.init(sequelize);
-Hashtag.init(sequelize);
-User.associate(db);
-Post.associate(db);
-Hashtag.associate(db);
+ChatRoom.init(sequelize);
+
+//User.associate(db);
+//ChatRoom.associate(db);
 
 module.exports = db;
