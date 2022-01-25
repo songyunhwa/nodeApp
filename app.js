@@ -101,10 +101,9 @@ io.use((socket, next) => {
   chat.on('connection', (socket) => {
 
     const req = socket.request;
-    const { headers: { referer } } = req;
-    const roomId = referer
-      .split('/')[referer.split('/').length - 1]
-      .replace(/\?.+/, '');
+    console.log("connection " + req);
+    const roomId = req.body;
+  
 
     //roomId 에 join
     socket.join(roomId);

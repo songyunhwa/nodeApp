@@ -3,24 +3,35 @@ const router=express.Router();
 
 
 const mysql  = require('../mysql');
+
 router.get('/list',  async(req, res, next) =>{
-  
-            var data = [];
-            mysql.getConnection( (error, connection)=>{ 
-              
-               
-             connection.query('SELECT * FROM chatrooms', function (error, results, fields) {
-                if (error) res.body = error;
-                
-                results.forEach(result => {
-                    data.push(result);
-                });
-              });
-            });
+    var data = [];
+        const results = await getRoomList();
+        results.forEach(result => {
+            const room = {
+               id: result.id,
+               title: result.title,
+               owner: result.owner,
+               password: result.password,
+               max: result.max
+            };
+            data.push(room);
+        });
 
-        //res.render("__dirname + "/public/room.html);
-
+        res.send(data);
 });
+getRoomList = () =>{
+   
+    return new Promise((resolve, reject) =>{
+        mysql.getConnection((error, connection)=>{ 
+            connection.query('SELECT * FROM chatrooms', function (error, results, fields) {
+               if (error) res.body = error;
+            
+               resolve(results);
+             });
+           });
+    });
+};
 
 router.post('/room', async(req, res, next)=>{
 
