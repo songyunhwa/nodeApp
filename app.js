@@ -93,7 +93,12 @@ io.use((socket, next) => {
 
   room.on('connection', (socket) => {
     console.log('room 네임스페이스에 접속');
-
+    room.on('newRoom', ()=> {
+      console.log('room 들어감');
+    });
+    room.on('removeRoom', ()=> {
+      console.log('room 나감');
+    });
     socket.on('disconnect', () => {
       console.log('room 네임스페이스 접속 해제');
     });
@@ -102,7 +107,6 @@ io.use((socket, next) => {
   chat.on('connection', (socket) => {
 
     const req = socket.request;
-    console.log("connection " + req);
     const roomId = req.body;
   
     //roomId 에 join
@@ -111,7 +115,6 @@ io.use((socket, next) => {
       user: 'system',
       chat: `${req.session.color}님이 입장하셨습니다.`,
     });
-    console.log("방에 들어옴.");
 
     socket.on('disconnect', () => {
       socket.leave(roomId);
@@ -133,7 +136,14 @@ io.use((socket, next) => {
           chat: `${req.session.color}님이 퇴장하셨습니다.`,
         });
 
-        onsole.log("방에 나감.");
+        axios.post(`http://localhost:8081/room/${roomId}`)
+        .then(() => {
+          console.log('방 제거 요청 성공');
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+
       }
     })
 });

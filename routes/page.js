@@ -53,11 +53,12 @@ router.post('/room', async(req, res, next)=>{
         
 });
 
-updateChatrooms= (room) => {
+updateChatroomUser= (userCnt) => {
+  
     return new Promise((resolve, reject) =>{
         mysql.getConnection((error, connection)=>{ 
-            connection.query('UPDATE chatrooms SET max=' + room.max + 1, function (error, results, fields) {
-               if (error) res.body = error;
+            connection.query('UPDATE chatrooms SET current= ?' ,[userCnt], function (error, results, fields) {
+               if (error) reject(error);
         
                resolve(results);
              });
@@ -65,6 +66,7 @@ updateChatrooms= (room) => {
     });
 };
 
+/* 채팅룸 들어가기 */
 router.get('/room/:id', async(req, res, next)=>{
     try{
         mysql.getConnection((error, connection)=>{ 
@@ -78,7 +80,7 @@ router.get('/room/:id', async(req, res, next)=>{
                  return res.redirect('/?error=허용 인원을 초과했습니다.');
                 }
 
-                updateChatrooms(results).catch((error) => {
+                updateChatroomUser(results[0].current+1).catch((error) => {
                     console.log(error);
                     console.error(error);
                 })
@@ -96,6 +98,25 @@ router.get('/room/:id', async(req, res, next)=>{
     }
 });
 
+/* 채팅방 나가기 */
+router.post('/room/:id', async(req, res, next)=>{ 
+    try{
+        mysql.getConnection((error, connection)=>{ 
+            connection.query('SELECT * FROM chatrooms WHERE id = ?', [req.params.id] , function (error, results, fields) {
+             
+                updateChatroomUser(results[0].current+1).catch((error) => {
+                    console.log(error);
+                    console.error(error);
+                })
+            })
+        });
+
+    }catch(error){
+        console.log(error);
+        console.error(error);
+    }
+});
+
 deleteRoom = (req) =>{
     return new Promise((resolve, reject) =>{
         mysql.getConnection((error, connection)=>{ 
@@ -108,15 +129,22 @@ deleteRoom = (req) =>{
     });
 };
 
+/* 채팅방 삭제 */
 router.delete('/room/:id', async(req, res, next)=>{
     deleteRoom(req).then(() => {
-        
-        setTimeout(()=> {
-            req.app.get('io').of('/room').emit('removeRoom', req.params.id);
-        }, 2000);
+        console.log("들어옴");
+        req.app.get('io').of('/room').emit('removeRoom', req.params.id);
+ 
     }).catch((error)=> {
         console.error(error);
         console.log(error);
     })
+});
+
+
+router.post('/chat', async(req, res, next)=>{
+        const io = req.app.get('io');
+        io.of('/chat').emit('chat', req.data);
+        res.render('room');
 });
 module.exports = router;

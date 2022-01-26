@@ -18,6 +18,11 @@ module.exports = class ChatRoom extends Sequelize.Model {
                 allowNull: false,
                 unique: false,
             },
+            current:{
+                type: Sequelize.INTEGER,
+                allowNull: false,
+                unique: false,
+            },
             max:{
                 type: Sequelize.INTEGER,
                 allowNull: false,
