@@ -53,6 +53,18 @@ router.post('/room', async(req, res, next)=>{
         
 });
 
+updateChatrooms= (room) => {
+    return new Promise((resolve, reject) =>{
+        mysql.getConnection((error, connection)=>{ 
+            connection.query('UPDATE chatrooms SET max=' + room.max + 1, function (error, results, fields) {
+               if (error) res.body = error;
+        
+               resolve(results);
+             });
+           });
+    });
+};
+
 router.get('/room/:id', async(req, res, next)=>{
     try{
         mysql.getConnection((error, connection)=>{ 
@@ -66,7 +78,12 @@ router.get('/room/:id', async(req, res, next)=>{
                  return res.redirect('/?error=허용 인원을 초과했습니다.');
                 }
 
-        
+                updateChatrooms(results).catch((error) => {
+                    console.log(error);
+                    console.error(error);
+                })
+
+                console.log("go room Id : " +title);
                  return res.render('chat', {rooms,
                      title: title,
                      chats: [],
@@ -79,21 +96,27 @@ router.get('/room/:id', async(req, res, next)=>{
     }
 });
 
-router.delete('/room/:id', async(req, res, next)=>{
-    try{
+deleteRoom = (req) =>{
+    return new Promise((resolve, reject) =>{
         mysql.getConnection((error, connection)=>{ 
+            connection.query('DELETE FROM chatrooms WHERE id = ?', [req.params.id] , function (error, results, fields) {
+                if (error) reject(error);
+                resolve();
 
-            connection.query('DELETE * FROM chatrooms WHERE id = ?', [req.body.id] , function (error, results, fields) {
-                if (error) res.body = error;
-                console.log(results);
             })
         });
-        res.send('ok');
+    });
+};
+
+router.delete('/room/:id', async(req, res, next)=>{
+    deleteRoom(req).then(() => {
+        
         setTimeout(()=> {
             req.app.get('io').of('/room').emit('removeRoom', req.params.id);
         }, 2000);
-    }catch(error){
+    }).catch((error)=> {
+        console.error(error);
         console.log(error);
-    }
+    })
 });
 module.exports = router;

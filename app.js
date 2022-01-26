@@ -93,6 +93,7 @@ io.use((socket, next) => {
 
   room.on('connection', (socket) => {
     console.log('room 네임스페이스에 접속');
+
     socket.on('disconnect', () => {
       console.log('room 네임스페이스 접속 해제');
     });
@@ -104,14 +105,13 @@ io.use((socket, next) => {
     console.log("connection " + req);
     const roomId = req.body;
   
-
     //roomId 에 join
     socket.join(roomId);
     socket.to(roomId).emit('join', {
       user: 'system',
       chat: `${req.session.color}님이 입장하셨습니다.`,
     });
-
+    console.log("방에 들어옴.");
 
     socket.on('disconnect', () => {
       socket.leave(roomId);
@@ -132,6 +132,8 @@ io.use((socket, next) => {
           user: 'system',
           chat: `${req.session.color}님이 퇴장하셨습니다.`,
         });
+
+        onsole.log("방에 나감.");
       }
     })
 });
