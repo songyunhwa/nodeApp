@@ -71,7 +71,7 @@ router.get('/room/:id', async(req, res, next)=>{
     try{
         mysql.getConnection((error, connection)=>{ 
             connection.query('SELECT * FROM chatrooms WHERE id = ?', [req.params.id] , function (error, results, fields) {
-                console.log(results[0].title);
+ 
                 const title = results[0].title;
 
                 const io = req.app.get('io');
@@ -85,8 +85,8 @@ router.get('/room/:id', async(req, res, next)=>{
                     console.error(error);
                 })
 
-                console.log("go room Id : " +title);
-                 return res.render('chat', {rooms,
+                 return res.render('chat', {
+                     roomId: results[0].id,
                      title: title,
                      chats: [],
                     user: req.session.color});
@@ -141,10 +141,5 @@ router.delete('/room/:id', async(req, res, next)=>{
     })
 });
 
-
-router.post('/chat', async(req, res, next)=>{
-        const io = req.app.get('io');
-        io.of('/chat').emit('chat', req.data);
-        res.render('room');
-});
 module.exports = router;
+

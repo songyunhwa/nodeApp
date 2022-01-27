@@ -9,6 +9,7 @@ const pageRouter = require('./routes/page');
 //const cors = require('@koa/cors'); 
 const app = express();
 const bodyParser = require("body-parser");
+const axios = require('axios');
 
 
 dotenv.config(); // 현재 디렉토리 위치한 환경변수 읽어냄.
@@ -65,7 +66,7 @@ app.proxy = true; // true 일때 proxy 헤더들을 신뢰함
 app.use(cors());*/
 const options = {
     cors: {
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:8081'],
     methods: ['GET', 'POST'],
     },
 };
@@ -104,21 +105,30 @@ io.use((socket, next) => {
     });
   });
 
+ 
   chat.on('connection', (socket) => {
 
-    const req = socket.request;
-    const roomId = req.body;
-  
-    //roomId 에 join
-    socket.join(roomId);
-    socket.to(roomId).emit('join', {
-      user: 'system',
-      chat: `${req.session.color}님이 입장하셨습니다.`,
+    socket.on('joinRoom', (data) => {
+      console.log(data.user + "join Room" + data.roomId);
+      //roomId 에 join
+       socket.join(data.roomId);
+       chat.to(data.roomId).emit('msg', {
+          user: 'system',
+          data: data.user + `님이 입장하셨습니다.`,
+       });
     });
-
-    socket.on('disconnect', () => {
+     socket.on('msg', (data) => {
+       //room 에 들어오는 채팅
+        chat.to(data.roomId).emit('msg', {
+          user: data.user,
+          data: data.data
+    });
+  })
+  
+/*
+    socket.on('disconnect', (roomId, user) => {
       socket.leave(roomId);
-      // 사용자 
+      console.log("socket disconnect" + roomId);
       const users = socket.adapter.rooms[roomId];
       const userCount = users ? users.users : 0;
       if (userCount === 0) { 
@@ -133,7 +143,7 @@ io.use((socket, next) => {
       } else {
         socket.to(roomId).emit('exit', {
           user: 'system',
-          chat: `${req.session.color}님이 퇴장하셨습니다.`,
+          chat:  user + `님이 퇴장하셨습니다.`,
         });
 
         axios.post(`http://localhost:8081/room/${roomId}`)
@@ -145,5 +155,5 @@ io.use((socket, next) => {
         });
 
       }
-    })
+    })*/
 });
