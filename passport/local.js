@@ -5,10 +5,10 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user');
 
 module.exports =() => {
-    passport.user(new LocalStrategy({
+    passport.use(new LocalStrategy({
         usernameField: 'email',
         passwordField: 'password',
-    }, async(eamil, password, done) => {
+    }, async(email, password, done) => {
         try{
             const exUser = await User.findOne({where : {email}});
             if(exUser){

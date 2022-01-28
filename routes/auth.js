@@ -2,9 +2,18 @@ const express = require('express');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
-const router = require('./page');
-import Joi from '@hapi/joi';
-import User from '../../models/user';
+const { urlencoded } = require('body-parser');
+const router = express.Router();
+
+router.get('/naverlogin', 
+  passport.authenticate('naver', { authType: 'reprompt' }));
+
+router.get('/callback',
+  passport.authenticate('naver', { failureRedirect: '/' }),
+  (req, res) => {
+     res.redirect('/');
+  },
+);
 
 /*
   POST /api/auth/register
@@ -13,8 +22,13 @@ import User from '../../models/user';
     password: 'mypass123'
   }
 */
+
 router.post('/join', async ctx => {
   const { email, nick, password } = ctx.request.body;
+  passport.authenticate('naver', { authType: 'reprompt' });
+});
+
+  /*
   try {
     // username  이 이미 존재하는지 확인
     const exists = await User.findByUsername(username);
@@ -38,7 +52,7 @@ router.post('/join', async ctx => {
   }
 });
 
-
+*/
 router.post('/login',  async ctx => {
   passport.authenticate('local', (authError, user, info)=> {
   if(authError){
@@ -54,6 +68,7 @@ router.post('/login',  async ctx => {
       }
         return res.redirect('/');
     });
+});
 });
 
 

@@ -30,44 +30,45 @@
 
 <body>
   <%= title %>
-
+  <input type="button" id="exit" value="나가기"></input>
   <div id="chatContent"></div>
   <input type="text" id="msg" style="width: 200px;">
   <input type="button" id="sendMsg" value="전송"></input>
 
   <script>
-          window.onload = function() {
+    window.onload = function() {
 
     const roomId = "<%= roomId %>";
-    console.log(roomId);
     const socket =  io.connect("http://localhost:4042/chat");
-
     const user = "user";
 
     socket.emit("joinRoom",{ roomId, user });
         
-            // 버튼 클릭 
-            document.getElementById("sendMsg").onclick = function() {
-              console.log("sendMsg");
-                      
-                const data = document.getElementById('msg').value;
-                console.log("sendMessage : " + data);
+    // 버튼 클릭 
+    document.getElementById("sendMsg").onclick = function() {
+    console.log("sendMsg");
+           
+    const data = document.getElementById('msg').value;
+    console.log("sendMessage : " + data);
 
-                socket.emit("msg", {
-                  roomId : roomId,
-                  user: user,
-                  data: data
-                })
+    socket.emit("msg", {
+      roomId : roomId,
+      user: user,
+      data: data
+    })
 
-            
-          }
-            
-            socket.on('msg', (data) => {
-              $("#chatContent").append("<div>" + data.user + " :  " + data.data + "</div>");
-            });
-   
-          }
+    
+  }
+    
+  socket.on('msg', (data) => {
+      $("#chatContent").append("<div>" + data.user + " :  " + data.data + "</div>");
+   });
+  
+  document.getElementById("exit").onclick = function() {
+    socket.emit("leaveRoom", {roomId, user});
+  };
 
+  }
   </script>
 </body>
 

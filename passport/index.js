@@ -1,7 +1,6 @@
 const passport = require('passport');
-const local = require('./localStrategy');
-const kakao = require('./kakaoStrategy');
-const user = require('../models/user');
+const local = require('./local');
+const naver = require('./naver');
 const { User } = require('../models');
 
 module.exports =  () => {
@@ -13,5 +12,8 @@ module.exports =  () => {
         User.findOne({where : {id}}) //매요청시
         .then(user => done(null, user))
         .catch(err => donw(err));
-    })
+    });
+
+    local();
+    naver();
 }

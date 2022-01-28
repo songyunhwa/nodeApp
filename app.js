@@ -1,6 +1,6 @@
 const express=require('express');
 const cookieParser=require('cookie-parser');
-const morgan =require('morgan');
+//const morgan =require('morgan');
 const path=require('path');
 const session=require('express-session');
 //const nunjucks = require('nunjucks');
@@ -10,6 +10,7 @@ const pageRouter = require('./routes/page');
 const app = express();
 const bodyParser = require("body-parser");
 const axios = require('axios');
+const passport = require('passport');
 
 
 dotenv.config(); // 현재 디렉토리 위치한 환경변수 읽어냄.
@@ -34,8 +35,10 @@ app.use(session({
         secure: false,
     }
 }));
-//app.use(passport.initialize());
-//app.use(passport.session());
+
+// 네이버 로그인 연동 api
+app.use(passport.initialize());
+app.use(passport.session());
 
 
 app.use('/', pageRouter);
@@ -109,7 +112,7 @@ io.use((socket, next) => {
   chat.on('connection', (socket) => {
 
     socket.on('joinRoom', (data) => {
-      console.log(data.user + "join Room" + data.roomId);
+      console.log(data.user + "join Room " + data.roomId);
       //roomId 에 join
        socket.join(data.roomId);
        chat.to(data.roomId).emit('msg', {
@@ -125,12 +128,19 @@ io.use((socket, next) => {
     });
   })
   
-/*
-    socket.on('disconnect', (roomId, user) => {
+
+    socket.on('leaveRoom', (data) => {
+      const roomId = data.roomId;
+      const user = data.user;
+      
+      const userCnt = socket.adapter.rooms.get(roomId).size;
       socket.leave(roomId);
-      console.log("socket disconnect" + roomId);
-      const users = socket.adapter.rooms[roomId];
-      const userCount = users ? users.users : 0;
+
+      console.log(socket.adapter.rooms);
+   
+
+      const userCount = userCnt ? userCnt-1 : 0;
+      console.log(userCount);
       if (userCount === 0) { 
 
         axios.delete(`http://localhost:8081/room/${roomId}`)
@@ -141,19 +151,11 @@ io.use((socket, next) => {
             console.error(error);
           });
       } else {
-        socket.to(roomId).emit('exit', {
+        socket.to(roomId).emit('msg', {
           user: 'system',
-          chat:  user + `님이 퇴장하셨습니다.`,
-        });
-
-        axios.post(`http://localhost:8081/room/${roomId}`)
-        .then(() => {
-          console.log('방 제거 요청 성공');
-        })
-        .catch((error) => {
-          console.error(error);
+          data:  user + '님이 퇴장하셨습니다.',
         });
 
       }
-    })*/
+    })
 });
