@@ -1,12 +1,13 @@
 const express = require('express');
-const passport = require('passport');
 const bcrypt = require('bcrypt');
-const User = require('../models/user');
 const { urlencoded } = require('body-parser');
 const router = express.Router();
+const passport= require('../passport/index');
+const mysql  = require('../mysql');
+const models = require("../models");
 
 router.get('/naverlogin', 
-  passport.authenticate('naver', { authType: 'reprompt' }));
+  passport.authenticate('naver', { scope: ['profile'] }));
 
 router.get('/callback',
   passport.authenticate('naver', { failureRedirect: '/' }),
@@ -15,45 +16,37 @@ router.get('/callback',
   },
 );
 
-/*
-  POST /api/auth/register
-  {
-    username: 'velopert',
-    password: 'mypass123'
-  }
-*/
 
-router.post('/join', async ctx => {
-  const { email, nick, password } = ctx.request.body;
-  passport.authenticate('naver', { authType: 'reprompt' });
-});
-
-  /*
-  try {
+router.post('/join', async (req, res) => {
+  const { email, nick, password } = req.body;
     // username  이 이미 존재하는지 확인
-    const exists = await User.findByUsername(username);
-    if (exists) {
-      ctx.status = 409; // Conflict
-      return;
+   models.User.findOne({ where: { email: email }})
+   .then( async( user )=> {
+    try {
+      if(user){
+        res.send(409);
+        return;
+      }
+      const hash = await bcrypt.hash(password, 12);
+      models.User.create({
+        email : email,
+        nick : nick,
+        password : hash,
+      });
+
+      return res.redirect('/');
+    } catch (e) {
+      console.log(e);
     }
-    const hash = await bcrypt.hash(password, 12);
-    const user = new User({
-      email,
-      nick,
-      password : hash,
-    });
-    await user.save(); // 데이터베이스에 저장
-
-    return res.redirect('/');
-  } catch (e) {
-    console.log(e);
-    return next(e);
-
-  }
+   })
+   .catch(() => {
+      res.status = 409; // Conflict
+      return;
+    })
 });
 
-*/
-router.post('/login',  async ctx => {
+
+router.post('/login',  (req, res) => {
   passport.authenticate('local', (authError, user, info)=> {
   if(authError){
       console.error(authError);

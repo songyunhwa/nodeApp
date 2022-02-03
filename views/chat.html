@@ -45,7 +45,7 @@
     socket.emit("joinRoom",{ roomId, user });
         
             // 버튼 클릭 
-            document.getElementById("sendMsg").onclick = function() {
+          document.getElementById("sendMsg").onclick = function() {
               console.log("sendMsg");
                       
                 const data = document.getElementById('msg').value;
@@ -60,11 +60,22 @@
             
           }
             
-            socket.on('msg', (data) => {
+          socket.on('msg', (data) => {
               $("#chatContent").append("<div>" + data.user + " :  " + data.data + "</div>");
-            });
+          });
    
+
+          document.getElementById("exit").onclick = function() {
+            console.log("exit");
+                socket.emit("leaveRoom", {
+                  roomId : roomId,
+                  user: user
+                })
+            
           }
+            
+
+  }
 
   </script>
 </body>

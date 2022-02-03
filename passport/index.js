@@ -1,9 +1,10 @@
 const passport = require('passport');
-const local = require('./local');
-const naver = require('./naver');
+//const naver = require('./naver');
 const { User } = require('../models');
 
-module.exports =  () => {
+const naver = require('./naver');
+const local = require('./local');
+
     passport.serializeUser((user, done) => {
         done(null, user.id);//로그인시
     }); 
@@ -14,6 +15,7 @@ module.exports =  () => {
         .catch(err => donw(err));
     });
 
-    local();
     naver();
-}
+    local();
+
+module.exports=passport;

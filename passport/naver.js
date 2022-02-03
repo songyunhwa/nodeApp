@@ -1,18 +1,16 @@
 const passport = require('passport');
-const { Strategy: NaverStrategy, Profile: NaverProfile } = require('passport-naver-v2');
-
-const client_secret = process.env.client_code;
-const client_id= process.env.client_id;
-const redirectURI= '/auth/callback';
+const NaverStrategy = require('passport-naver').Strategy;
 const User = require('../models/user');
 
+
 module.exports = () => {
+
     passport.use(
        new NaverStrategy(
           {
-             clientID: client_id,
-             clientSecret: client_secret,
-             callbackURL: redirectURI,
+             clientID: process.env.client_id,
+             clientSecret: process.env.client_secret,
+             callbackURL: '/auth/callback',
           },
           async (accessToken, refreshToken, profile, done) => {
              console.log('naver profile : ', profile);
@@ -42,3 +40,4 @@ module.exports = () => {
        ),
     );
   };
+  

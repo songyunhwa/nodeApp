@@ -10,7 +10,7 @@ const pageRouter = require('./routes/page');
 const app = express();
 const bodyParser = require("body-parser");
 const axios = require('axios');
-const passport = require('passport');
+const passport = require('./passport/index');
 
 
 dotenv.config(); // 현재 디렉토리 위치한 환경변수 읽어냄.
@@ -135,7 +135,6 @@ io.use((socket, next) => {
       
       const userCnt = socket.adapter.rooms.get(roomId).size;
       socket.leave(roomId);
-
       console.log(socket.adapter.rooms);
    
 
@@ -159,3 +158,5 @@ io.use((socket, next) => {
       }
     })
 });
+
+console.log("process.env.client_id : " +process.env.client_id);
