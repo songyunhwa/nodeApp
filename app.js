@@ -10,8 +10,8 @@ const pageRouter = require('./routes/page');
 const app = express();
 const bodyParser = require("body-parser");
 const axios = require('axios');
-const passport = require('./passport/index');
-
+const passport = require('passport');
+const passportConfig = require('./passport');
 
 dotenv.config(); // 현재 디렉토리 위치한 환경변수 읽어냄.
 
@@ -37,18 +37,21 @@ app.use(session({
 }));
 
 // 네이버 로그인 연동 api
+passportConfig();
 app.use(passport.initialize());
 app.use(passport.session());
 
 
 app.use('/', pageRouter);
 
+/*
 app.use((err, req, res, next) => {
     res.locals.message = err.message;
     res.locals.error = process.env.NODE_ENV !== 'production' ? err : {};
     res.status(err.status || 500);
-    res.render('error');
-});
+    res.end();
+    //res.render('error');
+});*/
 
 app.listen(app.get('port'), () => {
     console.log(app.get('port'), '번 포트에서 대기 중');

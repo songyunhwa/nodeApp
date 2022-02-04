@@ -40,7 +40,7 @@
 
     const roomId = "<%= roomId %>";
     const socket =  io.connect("http://localhost:4042/chat");
-    const user = "user";
+    const user = "<%= user %>";
 
     socket.emit("joinRoom",{ roomId, user });
         

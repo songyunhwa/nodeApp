@@ -65,11 +65,13 @@ try{
              return res.redirect('/?error=허용 인원을 초과했습니다.');
             }
 
+            console.log("session user   " + req.user);
+
              return res.render('chat', {
                  roomId: results[0].id,
                  title: title,
                  chats: [],
-                user: req.session.color});
+                user: req.session.user});
             })
     });
     

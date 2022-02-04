@@ -2,17 +2,30 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const { urlencoded } = require('body-parser');
 const router = express.Router();
-const passport= require('../passport/index');
+const passport= require('passport');
 const mysql  = require('../mysql');
 const models = require("../models");
+const app = this;
 
 router.get('/naverlogin', 
-  passport.authenticate('naver', { scope: ['profile'] }));
+  passport.authenticate('naver', { authType: 'reprompt' }));
 
 router.get('/callback',
   passport.authenticate('naver', { failureRedirect: '/' }),
-  (req, res) => {
-     res.redirect('/');
+  (error, user, req, res) => {
+    if(error){
+      return res.send(error);
+    }
+    if(!user){
+      return res.send("user 가 없습니다");
+    }
+
+    req.login(user, (loginError) => {
+      if(loginError){
+         return next(loginError);
+      } 
+        return res.send(); //res.redirect('/');
+    });
   },
 );
 
@@ -34,7 +47,7 @@ router.post('/join', async (req, res) => {
         password : hash,
       });
 
-      return res.redirect('/');
+      return res.end(); //res.redirect('/');
     } catch (e) {
       console.log(e);
     }
@@ -45,30 +58,28 @@ router.post('/join', async (req, res) => {
     })
 });
 
-
-router.post('/login',  (req, res) => {
-  passport.authenticate('local', (authError, user, info)=> {
-  if(authError){
-      console.error(authError);
+router.post('/login', passport.authenticate('local'), 
+(error, user, req, res) => {
+  if(error){
+    return res.send(error);
   }
   if(!user){
-      return "user 가 없습니다"
-  }
-  return req.login(user, (loginError) => { //serializerUser 호출
-      if(loginError){
-          console.log(loginError);
-          return next(loginError);
-      }
-        return res.redirect('/');
-    });
+    return res.send("user 가 없습니다");
+}
+ //serializerUser 호출
+  req.login(user, (loginError) => {
+    if(loginError){
+      console.log("에러있음");
+       return next(loginError);
+    } 
+      return res.send(); //res.redirect('/');
+  });
 });
-});
-
 
 router.get('/logout', (req,res) => {
     req.logout();
     req.session.destroy();
-    res.redirect('/');
+    res.end(); //res.redirect('/');
 });
 
 module.exports = router;
