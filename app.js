@@ -127,6 +127,7 @@ io.use((socket, next) => {
        //room 에 들어오는 채팅
         chat.to(data.roomId).emit('msg', {
           user: data.user,
+          userId: data.userId,
           data: data.data
     });
   })

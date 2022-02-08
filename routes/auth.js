@@ -14,7 +14,8 @@ router.get('/callback',
   passport.authenticate('naver', { failureRedirect: '/' }),
   (error, user, req, res) => {
     if(error){
-      return res.send(error);
+      console.log(error);
+      return;
     }
     if(!user){
       return res.send("user 가 없습니다");

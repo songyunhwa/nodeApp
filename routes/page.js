@@ -2,6 +2,8 @@ const express=require('express');
 const router=express.Router();
 const authRouter = require('./auth');
 const roomRouter = require('./chat');
+const boardRouter = require('./board');
+const postRouter = require('./post');
 
 /* 세션 로그인 정보
 var authenticate = function (req, res, next) {
@@ -14,6 +16,7 @@ authenticate(); */
 
 router.use('/room', roomRouter);
 router.use('/auth', authRouter);
-
+router.use('/board', boardRouter);
+router.use('/post', postRouter);
 module.exports = router;
 

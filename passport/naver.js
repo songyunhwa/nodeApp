@@ -27,7 +27,8 @@ module.exports = () => {
           
                    const newUser = await User.create({
                       email: profile._json.email,
-                      nick: profile._json.nickname == null? profile._json.email : profile._json.nickname ,
+                      nick: profile._json.nickname == null? 
+                      profile._json.email.substring(0, profile._json.email.indexOf('@')) : profile._json.nickname ,
                       snsId: profile._json.id,
                       provider: 'naver',
                    });

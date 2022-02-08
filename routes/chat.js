@@ -32,12 +32,14 @@ router.get('/list',  async(req, res, next) =>{
 });
 
 router.post('/', async(req, res, next)=>{
-
     const newRoom = req.body;
     mysql.getConnection((error, connection)=>{ 
-        
+    let owner = req.user.id; 
+    let password=  req.body.password == null ? '' : req.body.password;
+    let max = req.body.max == null ? 2 : req.body.max;
+
     connection.query('INSERT INTO chatrooms (title, owner, password, max) VALUES(?,?,?,? ) '
-     , [req.body.title, req.body.owner, req.body.password, req.body.max],
+     , [req.body.title, owner, password , max],
      function (error, results, fields) {
         console.log(results);
         console.log(error);
@@ -65,13 +67,22 @@ try{
              return res.redirect('/?error=허용 인원을 초과했습니다.');
             }
 
-            console.log("session user   " + req.user);
+            //세션에 저장되어있는 user nickname 불러오기
+            var keys = Object.keys(req.user);
+            var values = Object.values(req.user);
+
+            var nick_index =  keys.indexOf("nick");
+            var user = values.splice(nick_index, 1);
+
+            console.log("id : "+  values[0]);
 
              return res.render('chat', {
                  roomId: results[0].id,
                  title: title,
                  chats: [],
-                user: req.session.user});
+                 user: user,
+                 userId:  values[0]
+            });
             })
     });
     

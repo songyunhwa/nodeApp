@@ -13,11 +13,7 @@ module.exports = () => {
     
     passport.deserializeUser((user , done) => {
         console.log(JSON.stringify(user));
-        const userInfo = {
-            user, // serializeUser에서 session에 저장한 정보
-            info : 'test message' // deserializeUser에서 추가로 저장한 정보
-        };
-        done(null, userInfo);
+        done(null, user);
     });
 
     naver();
