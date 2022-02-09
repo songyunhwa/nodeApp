@@ -1,6 +1,8 @@
 const express=require('express');
 const router=express.Router();
 const mysql  = require('../mysql');
+const post = require('../models/post');
+const { ChatRoom } = require('../models');
 
 getRoomList = () =>{
     return new Promise((resolve, reject) =>{
@@ -21,7 +23,8 @@ router.get('/list',  async(req, res, next) =>{
             const room = {
                id: result.id,
                title: result.title,
-               owner: result.owner,
+               postId: result.title,
+               userId: result.userId,
                password: result.password,
                max: result.max
             };
@@ -33,23 +36,36 @@ router.get('/list',  async(req, res, next) =>{
 
 router.post('/', async(req, res, next)=>{
     const newRoom = req.body;
-    mysql.getConnection((error, connection)=>{ 
-    let owner = req.user.id; 
+    let title = req.body.title == null ? '' : req.body.title;
+    let postId = req.body.postId == null ? '' : req.body.postId;
+    let userId = req.user.id;
     let password=  req.body.password == null ? '' : req.body.password;
     let max = req.body.max == null ? 2 : req.body.max;
 
-    connection.query('INSERT INTO chatrooms (title, owner, password, max) VALUES(?,?,?,? ) '
-     , [req.body.title, owner, password , max],
-     function (error, results, fields) {
-        console.log(results);
-        console.log(error);
-        //res.body = results;
-        console.log(newRoom);
-        const io = req.app.get('io');
-       io.of('/room').emit('newRoom', newRoom);
-       res.render('room');
-    }); 
-    });
+    ChatRoom.findOne({
+        where: {postId : postId, userId : userId}
+    })
+    .then((room) => {
+        console.log(room);
+        if(room == null){
+            mysql.getConnection((error, connection)=>{ 
+                connection.query('INSERT INTO chatrooms (title, postId, userId, password, max) VALUES(?,?,?,?,?) '
+                 , [title, postId, userId, password , max],
+                 function (error, results, fields) {
+                    //res.body = results;
+                    console.log(newRoom);
+                    const io = req.app.get('io');
+                   io.of('/room').emit('newRoom', newRoom);
+                   return res.json({status: 200, data : results});    
+                   //res.render('room');
+                }); 
+                });
+        }else {
+            return res.json({status: 200, data : room});   
+        }
+    })
+
+
     
 });
 
@@ -60,28 +76,27 @@ try{
         connection.query('SELECT * FROM chatrooms WHERE id = ?', [req.params.id] , function (error, results, fields) {
 
             const title = results[0].title;
+            const postId = results[0].postId; //게시글  id
+            const userId = results[0].userId; //채팅방 만든 유저 id
 
+            // 현재 채팅방 허용 인원 파악.
             const io = req.app.get('io');
             const {rooms} = io.of('/chat').adapter;
-            if(rooms && rooms[req.params.id] && rooms.max <= rooms[req.params.id].length){
-             return res.redirect('/?error=허용 인원을 초과했습니다.');
+            if(rooms && rooms[req.params.id] && rooms.max == rooms[req.params.id].length){
+                return res.redirect('/?error=허용 인원을 초과했습니다.');
             }
-
-            //세션에 저장되어있는 user nickname 불러오기
-            var keys = Object.keys(req.user);
-            var values = Object.values(req.user);
-
-            var nick_index =  keys.indexOf("nick");
-            var user = values.splice(nick_index, 1);
-
-            console.log("id : "+  values[0]);
+          
+            // 채팅방 소유 유저인지 파익.
+            if(postId != req.user.id && userId != req.user.id){
+                return res.end();
+            }
 
              return res.render('chat', {
                  roomId: results[0].id,
                  title: title,
                  chats: [],
-                 user: user,
-                 userId:  values[0]
+                 user: req.user.nick, //세션에 저장되어있는 user 
+                 userId:  req.user.id
             });
             })
     });

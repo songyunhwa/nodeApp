@@ -5,10 +5,15 @@ module.exports = class ChatRoom extends Sequelize.Model {
         return super.init({
             title:{
                 type: Sequelize.STRING(15),
-                allowNull: false,
-                unique: true,
+                allowNull: true,
+                unique: false,
             },
-            owner:{
+            postId:{
+                type: Sequelize.STRING(15),
+                allowNull: false,
+                unique: false,
+            },
+            userid:{
                 type: Sequelize.STRING(15),
                 allowNull: false,
                 unique: false,
@@ -18,17 +23,21 @@ module.exports = class ChatRoom extends Sequelize.Model {
                 allowNull: false,
                 unique: false,
             },
-            current:{
-                type: Sequelize.INTEGER,
-                allowNull: false,
-                unique: false,
-            },
             max:{
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 unique: false,
             },
-            
+            createdAt: {
+                allowNull: false,
+                type: Sequelize.DATE,
+                defaultValue: Sequelize.fn("NOW"), //이렇게 수정!
+             },
+             updatedAt: {
+                allowNull: false,
+                type: Sequelize.DATE,
+                defaultValue: Sequelize.fn("NOW"),
+             },
             
         },
         {

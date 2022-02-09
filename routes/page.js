@@ -16,7 +16,7 @@ authenticate(); */
 
 router.use('/room', roomRouter);
 router.use('/auth', authRouter);
-router.use('/board', boardRouter);
+router.use('/', boardRouter);
 router.use('/post', postRouter);
 module.exports = router;
 
