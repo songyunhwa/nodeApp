@@ -1,0 +1,72 @@
+<!doctype html> 
+<html>
+     <head> 
+        <button id="login">로그인</button>
+        <h1>목록</h1>
+        <table id="board">
+            <ul id="list">
+            </ul>
+        </table>
+      </body>
+      <button id="sendPost">글쓰기</button>
+    </head>
+         
+<body> 
+<script src='http://code.jquery.com/jquery-latest.js'></script>
+<script>
+    window.onload = function() {
+
+        let button = document.getElementById('button');
+        let input = document.getElementById('input');
+        let list = document.getElementById('list');
+
+        $.ajax({
+              url: '/post/list',
+              dataType: 'json',
+              type: 'GET',
+              success: function(result) {
+
+                  for(var i =0; i< result.length; i++){
+                    addList(result[i]);
+                  };
+                
+              }
+          });
+        
+        addList = function(element){
+            var temp = document.createElement('li');
+            
+            temp.innerHTML = '<tr>'
+                + '<div><td  onclick="location.href = "/post/' + element.id + '"">' +element.title + '</td></div>'
+                + '<div><td>' + element.content + '</td></div>'
+                + '<div><td>' + element.writer + '</td></div>' 
+                + '<div><input type="button" id="chat" value="채팅하기" onclick="createChat(' + element.id + ')"></button></table>';
+            list.appendChild(temp);
+        }
+        // 채팅방 만들어야함 ( 구매자 + 판매자 )
+        createChat = function(postId) {
+            console.log("createChat  " + postId);
+            
+            $.ajax({
+              url: '/room/',
+              dataType: 'json',
+              type: 'POST',
+              data: {
+                postId : postId
+              },
+              success: function(result) {
+                  location.href = "/room/" + result.data.id;
+              }
+          });
+        }  
+
+        document.getElementById("sendPost").onclick = function() {
+            location.href = "/post";
+        }
+
+        document.getElementById("login").onclick = function() {
+            location.href = "/auth/login";
+        }
+
+    }
+</script>

@@ -38,14 +38,16 @@
   <script>
     window.onload = function() {
 
+    let chats = [];
     const roomId = "<%= roomId %>";
     const socket =  io.connect("http://localhost:4042/chat");
-    const user = "<%= user %>";
+    const user  = "<%= user %>";
+    const userId = "<%= userId %>";
 
     socket.emit("joinRoom",{ roomId, user });
         
             // 버튼 클릭 
-          document.getElementById("sendMsg").onclick = function() {
+    document.getElementById("sendMsg").onclick = function() {
               console.log("sendMsg");
                       
                 const data = document.getElementById('msg').value;
@@ -54,13 +56,19 @@
                 socket.emit("msg", {
                   roomId : roomId,
                   user: user,
+                  userId: userId,
                   data: data
                 })
 
             
-          }
+    }
             
           socket.on('msg', (data) => {
+              chats.push({
+                user: data.user,
+                userId: data.userId,
+                data: data.data
+              });
               $("#chatContent").append("<div>" + data.user + " :  " + data.data + "</div>");
           });
    

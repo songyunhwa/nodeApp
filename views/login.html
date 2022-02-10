@@ -1,0 +1,94 @@
+<!doctype html> 
+<html>
+     <head> 
+        <div class = "login">
+            <h1 class = "title">로그인 페이지</h1>
+            <hr>
+            <p class = "email">이메일: <input type="text" /></p>
+            <p class = "nick">닉네임: <input type="text" /></p>
+            <p class = "pw">패스워드: <input type="text" /></p>
+            <p class = "button">
+                <div id="button" v-if="isLogin">
+                    <input type="button" id="login" value="로그인"></button>
+                </div>
+                <div v-else>
+                    <input type="button" id="join" value="회원가입"></button>
+                </div>
+            </p>
+            <hr>
+        </div>
+    </head>
+         
+<body> 
+<script src='http://code.jquery.com/jquery-latest.js'></script>
+<script>
+    window.onload = function() {
+
+        let login = document.getElementById('login');
+        let join = document.getElementById('join');
+        let email;
+        let nick;
+        let pw;
+        let isLogin = true;
+        if(document.pathname === 'login'){
+            isLogin = false;
+        }
+
+        check = function(element) {
+            if(element == null) return false;
+            else if(element.value.length == 0) return false;
+        }
+        
+        join.onclick = function() {
+        email = document.getElementById('email');
+        nick = document.getElementById('nick');
+        pw = document.getElementById('pw');
+        let isLogin = true;
+
+        console.log(email);
+        if(!check(email) || !check(nick) || !check(pw)) {
+            return alert("칸이 비어 있습니다.");
+         }
+
+        const data = {
+            'email' : email.value, 
+            'nick' :  nick.value,
+            'password' : pw.value
+        };
+
+        $.ajax({
+            url: '/auth/join' ,
+            dataType: 'json',
+            type: 'POST',
+            data: data,
+            success: function(result) {
+                console.log("join result => " + result);
+            }
+        });
+        }
+
+        login.onclick = function() {
+            email = document.getElementById('email');
+            pw = document.getElementById('pw');
+            if(email.length.length === 0|| pw.length === 0) {
+                return alert("칸이 비어 있습니다.");
+            }
+
+           const data = {
+               'email' : email, 
+               'password' : pw
+           };
+   
+           $.ajax({
+               url: '/auth/login' ,
+               dataType: 'json',
+               type: 'POST',
+               data: data,
+               success: function(result) {
+                   console.log("login result => " + result);
+               }
+           });
+           }
+
+    }
+</script>
