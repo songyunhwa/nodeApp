@@ -1,7 +1,7 @@
 <!doctype html> 
 <html>
      <head> 
-        <button id="login">로그인</button>
+        <div id="auth"></div>
         <h1>목록</h1>
         <table id="board">
             <ul id="list">
@@ -19,6 +19,7 @@
         let button = document.getElementById('button');
         let input = document.getElementById('input');
         let list = document.getElementById('list');
+        let user = null;
 
         $.ajax({
               url: '/post/list',
@@ -32,7 +33,23 @@
                 
               }
           });
+          
+          $.ajax({
+              url: '/auth/loginCheck',
+              dataType: 'json',
+              type: 'GET',
+              success: function(result) {
+                  if(result.user){
+                    user = result.user;
+                    $("#auth").append("<button id='logout' onclick='logout()'>로그아웃</button>");
+                    $("#auth").append("<div>" + result.user.nick + "</div>")
+                  }else {
+                    $("#auth").append("<button id='login' onclick='login()'>로그인</button>");
+                  }
+              }
+          });
         
+          
         addList = function(element){
             var temp = document.createElement('li');
             
@@ -52,6 +69,7 @@
               dataType: 'json',
               type: 'POST',
               data: {
+                title: postId + ' chatting room',
                 postId : postId
               },
               success: function(result) {
@@ -64,9 +82,19 @@
             location.href = "/post";
         }
 
-        document.getElementById("login").onclick = function() {
+        login = function() {
             location.href = "/auth/login";
         }
 
+        logout = function() {
+                $.ajax({
+                    url: '/auth/logout' ,
+                    dataType: 'json',
+                    type: 'GET',
+                    success: function(result) {
+                        window.location.href='http://localhost:8081/';
+                    }
+                });
+           }
     }
 </script>

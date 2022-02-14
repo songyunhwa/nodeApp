@@ -4,9 +4,9 @@
         <div class = "login">
             <h1 class = "title">로그인 페이지</h1>
             <hr>
-            <p class = "email">이메일: <input type="text" /></p>
-            <p class = "nick">닉네임: <input type="text" /></p>
-            <p class = "pw">패스워드: <input type="text" /></p>
+            <p class = "email">이메일: <input id="email" type="text" /></p>
+            <p class = "nick">닉네임: <input id="nick" type="text" /></p>
+            <p class = "pw">패스워드: <input id="pw" type="text" /></p>
             <p class = "button">
                 <div id="button" v-if="isLogin">
                     <input type="button" id="login" value="로그인"></button>
@@ -15,6 +15,7 @@
                     <input type="button" id="join" value="회원가입"></button>
                 </div>
             </p>
+            <input type="button" id="naverlogin" value="네이버로 로그인"/>
             <hr>
         </div>
     </head>
@@ -35,14 +36,14 @@
         }
 
         check = function(element) {
-            if(element == null) return false;
-            else if(element.value.length == 0) return false;
+            if(element.length > 0) return true;
+            else return false;
         }
         
         join.onclick = function() {
-        email = document.getElementById('email');
-        nick = document.getElementById('nick');
-        pw = document.getElementById('pw');
+        email = document.getElementById('email').value;
+        nick = document.getElementById('nick').value;
+        pw = document.getElementById('pw').value;
         let isLogin = true;
 
         console.log(email);
@@ -51,9 +52,9 @@
          }
 
         const data = {
-            'email' : email.value, 
-            'nick' :  nick.value,
-            'password' : pw.value
+            'email' : email, 
+            'nick' :  nick,
+            'password' : pw
         };
 
         $.ajax({
@@ -62,16 +63,19 @@
             type: 'POST',
             data: data,
             success: function(result) {
-                console.log("join result => " + result);
+                alert("회원가입되었습니다.");
+            },
+            error: function(result){
+                alert("에러가 있습니다.");
             }
         });
         }
 
         login.onclick = function() {
-            email = document.getElementById('email');
-            pw = document.getElementById('pw');
-            if(email.length.length === 0|| pw.length === 0) {
-                return alert("칸이 비어 있습니다.");
+            email = document.getElementById('email').value;
+            pw = document.getElementById('pw').value;
+            if(!check(email) || !check(pw)) {
+            return alert("칸이 비어 있습니다.");
             }
 
            const data = {
@@ -85,9 +89,13 @@
                type: 'POST',
                data: data,
                success: function(result) {
-                   console.log("login result => " + result);
+                window.location.href='http://localhost:8081/';
                }
            });
+           }
+
+           document.getElementById("naverlogin").onclick = function() {
+                window.location.href='http://localhost:8081/auth/naverlogin';
            }
 
     }

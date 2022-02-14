@@ -79,18 +79,24 @@ try{
             const postId = results[0].postId; //게시글  id
             const userId = results[0].userId; //채팅방 만든 유저 id
 
+            post.findOne({id : postId}).then((post) => {
+                var postWriterId= post.writer;     
+                // 채팅방 소유 유저인지 파익.
+                console.log("req.user.id" + req.user.id);
+                console.log("userId" + userId);
+                console.log("postId" + postId);
+                if(postWriterId != req.user.id && userId != req.user.id){
+                    console.log("채팅방 소유 유저가 아닙니다.")
+                    return res.end();
+                }
+            })
             // 현재 채팅방 허용 인원 파악.
             const io = req.app.get('io');
             const {rooms} = io.of('/chat').adapter;
             if(rooms && rooms[req.params.id] && rooms.max == rooms[req.params.id].length){
                 return res.redirect('/?error=허용 인원을 초과했습니다.');
             }
-          
-            // 채팅방 소유 유저인지 파익.
-            if(postId != req.user.id && userId != req.user.id){
-                return res.end();
-            }
-
+    
              return res.render('chat', {
                  roomId: results[0].id,
                  title: title,
