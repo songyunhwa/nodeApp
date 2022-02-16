@@ -5,11 +5,11 @@
         <tbody>
             <tr>
                 <td>제목</td>
-                <td><input type="text" id="title"></input></td>
+                <td><input type="text" id="title" @value="title"></input></td>
             </tr>
             <tr>
                 <td>내용</td>
-                <td><input type="text" id="content"></input></td>
+                <td><input type="text" id="content" @value="content"></input></td>
             </tr>
             <tr>
                 <td>사진</td>
@@ -20,7 +20,6 @@
     </table>
     <div>
         <button id="sendPost">저장</button>
-        <button id="updatePost">수정</button> 
         <button id="deletePost">삭제</button> 
     </div>
     <div>
@@ -33,8 +32,16 @@
     
     window.onload = function() {
 
-    var button = document.getElementById('button');
-    var postId = "<%= postId %>";
+    let button = document.getElementById('button');
+    let postId = "<%= postId%>";
+    let title = "<%= title %>";
+    document.getElementById('title').value = title == "title" ? "" : title;
+    let content = "<%= content %>";
+    document.getElementById('content').value = content == "content" ? "" : content;
+    let writerYn = "<%= writerYn %>";
+
+    console.log("title  "  + content);
+    
     document.getElementById("sendPost").onclick = function() {
 
         var title = document.getElementById('title').value;
@@ -44,31 +51,10 @@
                   'title' : title, 
                   'content' : content 
                 };
-
-        $.ajax({
-              url: '/post/',
-              dataType: 'json',
-              type: 'POST',
-              data: data,
-              success: function(result) {
-                  if ( result['result'] == true ) {
-                      $('#result').html(result['msg']);
-                  }
-              }
-          });
-        }
-
-        
-    document.getElementById("updatePost").onclick = function() {
-        var title = document.getElementById('title').value;
-        var content = document.getElementById('content').value;
-
-        const data = {
-          'title' : title, 
-          'content' : content 
-        };
-
-        $.ajax({
+        console.log(postId.length);
+        if(postId.length > 0 && postId != '-1') {
+            console.log("post");
+            $.ajax({
             url: '/post/' + postId ,
             dataType: 'json',
             type: 'POST',
@@ -78,7 +64,20 @@
                    $('#result').html(result['msg']);
                 }     
             }
-        });
+            });
+        }else {
+            $.ajax({
+              url: '/post/',
+              dataType: 'json',
+              type: 'POST',
+              data: data,
+              success: function(result) {
+                  if ( result['result'] == true ) {
+                      $('#result').html(result['msg']);
+                  }
+              }
+            });
+        }
     }
 
     document.getElementById("deletePost").onclick = function() {

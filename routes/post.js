@@ -15,14 +15,29 @@ router.get('/list',  async(req, res, next) =>{
 
 router.get('/',  async(req, res, next) =>{
     res.render('post', {
-        postId : '-1'
+        postId : '-1',
+        title : 'title',
+        content: 'content',
+        writerYn : true
     });
 });
 
 router.get('/:id',  async(req, res, next) =>{
-    res.render('post', {
-        postId : req.params.id
-    });
+    console.log(req.params.id);
+    post.findOne({ where: { id: req.params.id }})
+    .then(result => {
+        let writerYn = req.user.id == result.writerId ? true : false;
+
+        return   res.render('post', {
+            postId : req.params.id,
+            title : result.title,
+            content: result.content,
+            writerYn : writerYn
+        });
+    })
+    .catch(err => {
+        console.error(err);
+    })
 });
 
 router.post('/', async(req, res, next) =>{
@@ -57,8 +72,6 @@ router.post('/', async(req, res, next) =>{
 
 router.post('/:id', async(req, res, next) =>{
     const { title, content, image } = req.body;
-
-    console.log("post 들어옴 " + req.params.id);
 
     post.update({
         title : title,
