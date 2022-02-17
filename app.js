@@ -12,6 +12,7 @@ const bodyParser = require("body-parser");
 const axios = require('axios');
 const passport = require('passport');
 const passportConfig = require('./passport');
+const chats = require('./models/chat');
 
 dotenv.config(); // 현재 디렉토리 위치한 환경변수 읽어냄.
 
@@ -89,29 +90,13 @@ httpServer.listen(4042);
 
 app.set('io', io);
 
-const room = io.of('/room');
 const chat = io.of('/chat');
-
 
 io.use((socket, next) => {
     cookieParser(process.env.COOKIE_SECRET)(socket.request, socket.request.res, next);
     sessionMiddleware(socket.request, socket.request.res, next);
   });
 
-  room.on('connection', (socket) => {
-    console.log('room 네임스페이스에 접속');
-    room.on('newRoom', ()=> {
-      console.log('room 들어감');
-    });
-    room.on('removeRoom', ()=> {
-      console.log('room 나감');
-    });
-    socket.on('disconnect', () => {
-      console.log('room 네임스페이스 접속 해제');
-    });
-  });
-
- 
   chat.on('connection', (socket) => {
 
     socket.on('joinRoom', (data) => {
@@ -124,12 +109,24 @@ io.use((socket, next) => {
        });
     });
      socket.on('msg', (data) => {
-       //room 에 들어오는 채팅
+       //room 에 들어오는 채팅 db 저장하고 emit
+       axios.post(`http://localhost:8081/chat/`, {
+        data: data.data,
+        roomId:data.roomId,
+        user: data.user,
+        userId:data.userId,
+       })
+       .then(() => {
         chat.to(data.roomId).emit('msg', {
           user: data.user,
           userId: data.userId,
           data: data.data
-    });
+        });
+       })
+       .catch((error) => {
+         console.error(error);
+       });
+
   })
   
 
@@ -139,8 +136,6 @@ io.use((socket, next) => {
       
       const userCnt = socket.adapter.rooms.get(roomId).size;
       socket.leave(roomId);
-      console.log(socket.adapter.rooms);
-   
 
       const userCount = userCnt ? userCnt-1 : 0;
       console.log(userCount);
@@ -148,7 +143,6 @@ io.use((socket, next) => {
 
         axios.delete(`http://localhost:8081/room/${roomId}`)
           .then(() => {
-            console.log('방 제거 요청 성공');
           })
           .catch((error) => {
             console.error(error);
@@ -158,9 +152,6 @@ io.use((socket, next) => {
           user: 'system',
           data:  user + '님이 퇴장하셨습니다.',
         });
-
       }
     })
 });
-
-console.log("process.env.client_id : " +process.env.client_id);

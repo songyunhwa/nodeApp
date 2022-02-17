@@ -54,32 +54,58 @@
             var temp = document.createElement('li');
             
             temp.innerHTML = '<tr>'
-                + '<div><td  onclick="location.href = "/post/' + element.id + '"">' +element.title + '</td></div>'
+                + '<div onClick="goPost(' + element.id + ')"><td>' +element.title + '</td></div>'
                 + '<div><td>' + element.content + '</td></div>'
                 + '<div><td>' + element.writer + '</td></div>' 
-                + '<div><input type="button" id="chat" value="채팅하기" onclick="createChat(' + element.id + ')"></button></table>';
+                + '<div><input type="button" id="chat" value="채팅하기" onclick="createChat(' + element.id + ')"></button></div>';
             list.appendChild(temp);
         }
+
+        goPost = function(postId) {
+            location.href = "/post/" + postId;
+        };
+
         // 채팅방 만들어야함 ( 구매자 + 판매자 )
         createChat = function(postId) {
-            console.log("createChat  " + postId);
-            
             $.ajax({
-              url: '/room/',
-              dataType: 'json',
-              type: 'POST',
-              data: {
-                title: postId + ' chatting room',
-                postId : postId
-              },
-              success: function(result) {
-                  location.href = "/room/" + result.data.id;
-              }
-          });
+                    url: '/auth/loginCheck' ,
+                    dataType: 'json',
+                    type: 'GET',
+                    success: function(result) {
+                        if(result.user){
+                            $.ajax({
+                                url: '/room/',
+                                dataType: 'json',
+                                type: 'POST',
+                                data: {
+                                    title: postId + ' chatting room',
+                                    postId : postId
+                                },
+                                success: function(result) {
+                                    location.href = "/room/" + result.data.id;
+                                }
+                            });
+                        }
+                        else return alert("로그인 후 채팅할 수 있습니다.");
+                    }
+            });
+            
+           
         }  
 
         document.getElementById("sendPost").onclick = function() {
-            location.href = "/post";
+            $.ajax({
+                    url: '/auth/loginCheck' ,
+                    dataType: 'json',
+                    type: 'GET',
+                    success: function(result) {
+                        if(result.user){
+                            location.href = "/post";
+                        }
+                        else alert("로그인 후 글을 쓸 수 있습니다.");
+                    }
+                });
+            
         }
 
         login = function() {

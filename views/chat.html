@@ -45,8 +45,25 @@
     const userId = "<%= userId %>";
 
     socket.emit("joinRoom",{ roomId, user });
-        
-            // 버튼 클릭 
+
+    //db 에서 채팅방 대화 불러오기.
+    $.ajax({
+              url: '/chat/' + roomId,
+              dataType: 'json',
+              type: 'GET',
+              success: function(result) {
+                result.data.forEach(data => {
+                  console.log(data);             
+                  $("#chatContent").append("<div>" + data.email + " :  " + data.data + "</div>");
+                });
+                  
+              },
+              error: function(result) {
+                alert(result.data);
+            }
+    });
+
+    // 버튼 클릭 
     document.getElementById("sendMsg").onclick = function() {
               console.log("sendMsg");
                       
@@ -58,9 +75,7 @@
                   user: user,
                   userId: userId,
                   data: data
-                })
-
-            
+                })         
     }
             
           socket.on('msg', (data) => {
@@ -74,12 +89,14 @@
    
 
           document.getElementById("exit").onclick = function() {
-            console.log("exit");
                 socket.emit("leaveRoom", {
                   roomId : roomId,
                   user: user
-                })
-            
+                }, (response) => {
+                  if(response.status =="ok"){
+                    location.href = "/";
+                  }
+                });
           }
             
 

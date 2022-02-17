@@ -1,11 +1,8 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const { urlencoded } = require('body-parser');
 const router = express.Router();
 const passport= require('passport');
-const mysql  = require('../mysql');
 const models = require("../models");
-const app = this;
 
 router.get('/login', (req, res, next) => {
   res.render('login');

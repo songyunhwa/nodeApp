@@ -26,7 +26,10 @@ router.get('/:id',  async(req, res, next) =>{
     console.log(req.params.id);
     post.findOne({ where: { id: req.params.id }})
     .then(result => {
-        let writerYn = req.user.id == result.writerId ? true : false;
+        let writerYn = false;
+        if(req.user) {
+            writerYn= req.user.id == result.writerId ? true : false;
+        }
 
         return   res.render('post', {
             postId : req.params.id,
@@ -40,12 +43,24 @@ router.get('/:id',  async(req, res, next) =>{
     })
 });
 
+getWriterPost = (req, res, next) => {
+    post.findOne({ where: { writerId: req.body.id }})
+    .then(result => {
+        return  res.json({data : result});
+    })
+    .catch(err => {
+        console.error(err);
+    })
+};
+
 router.post('/', async(req, res, next) =>{
     const { title, content, image } = req.body;
     try{
    
     const user = req.user;
-    console.log(user);
+    if(!user) {
+        return res.json({ status:400 , data :"로그인을 해야합니다."});
+    }
     
     let writerId = user.id;
     let writer = user.nick;
@@ -72,6 +87,9 @@ router.post('/', async(req, res, next) =>{
 
 router.post('/:id', async(req, res, next) =>{
     const { title, content, image } = req.body;
+    if(!req.user) {
+        return res.json({ status:400 , data :"로그인을 해야합니다."});
+    }
 
     post.update({
         title : title,
@@ -95,8 +113,8 @@ router.delete('/:id', async(req, res, next) =>{
         post.destroy(
             {
                 where : { id : req.params.id}
-            }).then(()=>{
-                res.redirect('/');
+            }).then((result)=>{
+                return res.json({result});
             })
 });
 

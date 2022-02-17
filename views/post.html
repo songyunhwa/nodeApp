@@ -15,12 +15,9 @@
                 <td>사진</td>
                 <td></td>
             </tr>
-            
         </tbody>
     </table>
-    <div>
-        <button id="sendPost">저장</button>
-        <button id="deletePost">삭제</button> 
+    <div id="button">
     </div>
     <div>
         <button id="goBoard">게시판으로 가기</button> 
@@ -35,14 +32,21 @@
     let button = document.getElementById('button');
     let postId = "<%= postId%>";
     let title = "<%= title %>";
-    document.getElementById('title').value = title == "title" ? "" : title;
     let content = "<%= content %>";
-    document.getElementById('content').value = content == "content" ? "" : content;
     let writerYn = "<%= writerYn %>";
 
-    console.log("title  "  + content);
+    document.getElementById('title').value = title == "title" ? "" : title;
+    document.getElementById('content').value = content == "content" ? "" : content;
     
-    document.getElementById("sendPost").onclick = function() {
+    // 작성자일 경우 버튼 생성
+    if(writerYn == "true"){
+        $("#button").append("<button id='sendPost' onClick='sendPost()'>저장</button>");
+        if(postId != "-1") {
+            $("#button").append("<button id='deletePost' onClick='deletePost()'>삭제</button>");
+        }
+    }
+
+    sendPost = function() {
 
         var title = document.getElementById('title').value;
         var content = document.getElementById('content').value;
@@ -51,7 +55,7 @@
                   'title' : title, 
                   'content' : content 
                 };
-        console.log(postId.length);
+
         if(postId.length > 0 && postId != '-1') {
             console.log("post");
             $.ajax({
@@ -60,9 +64,10 @@
             type: 'POST',
             data: data,
             success: function(result) {
-                if ( result['result'] == true ) {
-                   $('#result').html(result['msg']);
-                }     
+                alert("저장했습니다");
+            },
+            error: function(result) {
+                alert(result.data);
             }
             });
         }else {
@@ -72,23 +77,22 @@
               type: 'POST',
               data: data,
               success: function(result) {
-                  if ( result['result'] == true ) {
-                      $('#result').html(result['msg']);
-                  }
-              }
+                alert("저장했습니다");
+              },
+              error: function(result) {
+                alert(result.data);
+            }
             });
         }
     }
 
-    document.getElementById("deletePost").onclick = function() {
+    deletePost = function() {
         $.ajax({
             url: '/post/' + postId ,
             dataType: 'json',
             type: 'DELETE',
             success: function(result) {
-                if ( result['result'] == true ) {
-                $('#result').html(result['msg']);
-            }     
+                location.href = "/";
             }
         });
     }
