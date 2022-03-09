@@ -29,7 +29,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(session({
     resave: false,
-    saveUnitialized: false,
+    saveUnitialized: true,
     secret: process.env.COOKIE_SECRET,
     cookie: {
         httpOnly:true,

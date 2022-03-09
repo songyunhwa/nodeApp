@@ -1,7 +1,8 @@
 const express=require('express');
 const router=express.Router();
 const post  = require('../models/post');
-
+const multer = require('multer')
+const upload = multer({dest: 'images/'}) //dest : 저장 위치
 
 router.get('/list',  async(req, res, next) =>{
     post.findAll({})
@@ -107,6 +108,15 @@ router.post('/:id', async(req, res, next) =>{
      });
 
 
+});
+
+router.post('/upload/one',upload.single('img'),(req,res) => {
+    res.json(req.file)
+    console.log(req.file)
+})
+
+router.post('/upload/multipart', upload.array('img'), (req, res, next) => {    
+    res.status(201).send(res.json(req.files))
 });
 
 router.delete('/:id', async(req, res, next) =>{

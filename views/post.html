@@ -1,6 +1,7 @@
 <!doctype html> 
 <html>
 <div>
+    
     <table>
         <tbody>
             <tr>
@@ -13,13 +14,21 @@
             </tr>
             <tr>
                 <td>사진</td>
-                <td></td>
+                <td>
+                    <form id="fileForm" method="post" enctype="multipart/form-data"> 
+                        <input type="file" id="file" multiple="true"> 
+                    </form>
+                </td>
+                <td>
+                    <button id='sendImage' onClick='sendImage()'>사진 저장</button>
+                </td>
             </tr>
         </tbody>
     </table>
     <div id="button">
     </div>
     <div>
+        
         <button id="goBoard">게시판으로 가기</button> 
     </div>
 </div>
@@ -45,8 +54,13 @@
             $("#button").append("<button id='deletePost' onClick='deletePost()'>삭제</button>");
         }
     }
-
+    
     sendPost = function() {
+        /*
+        var image = document.getElementById("file");
+        if(image.length >0 && image != null) {
+            saveImage(image);
+        }*/
 
         var title = document.getElementById('title').value;
         var content = document.getElementById('content').value;
@@ -86,6 +100,25 @@
         }
     }
 
+    //saveImage = function() {
+    document.getElementById("sendImage").onclick = function() {
+        var image = $("#file")[0].files[0];
+        console.log(image);
+        $.ajax({
+              url: '/post/upload/one',
+              dataType: 'multipart/form-data',
+              type: 'POST',
+              img: image,
+              success: function(result) {
+                console.log(result);
+                alert("저장했습니다");
+              },
+              error: function(result) {
+                alert(result.data);
+            }
+            });
+    }
+
     deletePost = function() {
         $.ajax({
             url: '/post/' + postId ,
@@ -96,6 +129,7 @@
             }
         });
     }
+
 
     document.getElementById("goBoard").onclick = function() {
         location.href = "/";

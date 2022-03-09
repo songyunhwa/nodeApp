@@ -33,38 +33,26 @@ router.get('/loginCheck', (req, res, next) => {
 
 router.post('/join', async (req, res) => {
   const { email, nick, password } = req.body;
-
+    try{
     // username  이 이미 존재하는지 확인
-   models.User.findOne({ where: { email: email }})
-   .then( async( user )=> {
-    try {
-      if(user){
-        return  res.send(409);
-      }
-
-      const hash = await bcrypt.hash(password, 12);
-     
-      models.User.create({
-        email : email,
-        nick : nick,
-        password : hash,
-      })
-      .then((result) => {
-        return res.json({result}); 
-      })
-    } catch (e) {
-      console.log(e);
+   const hash = await bcrypt.hash(password, 12);
+   const [users, created] = await models.User.findOrCreate({
+    where: {  email : email },
+    defaults: {
+     email : email,
+     nick : nick,
+     password : hash
     }
    })
-   .catch(() => {
-      res.status = 409; // Conflict
-      return;
-    })
+  }catch{
+        res.status = 409; // Conflict
+        return;
+  }
 });
 
 router.post('/login',(req,res, next)=> {
   passport.authenticate('local', (error, user, info) => {
-
+    
     if(error){
       return res.json({status: 404, data: error});  
     }

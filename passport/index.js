@@ -12,8 +12,8 @@ module.exports = () => {
     }); 
     
     passport.deserializeUser((user , done) => {
-        console.log(JSON.stringify(user));
-        done(null, user);
+      if(user)  
+          done(null, user);
     });
 
     naver();
