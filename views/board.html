@@ -55,6 +55,7 @@
             
             temp.innerHTML = '<tr>'
                 + '<div onClick="goPost(' + element.id + ')"><td>' +element.title + '</td></div>'
+                + '<div><img src="C:\Users\82107\myApp\nodeApp\routes\images\"' + element.image + '"/></div>' 
                 + '<div><td>' + element.content + '</td></div>'
                 + '<div><td>' + element.writer + '</td></div>' 
                 + '<div><input type="button" id="chat" value="채팅하기" onclick="createChat(' + element.id + ')"></button></div>';
@@ -62,7 +63,7 @@
         }
 
         goPost = function(postId) {
-            location.href = "/post/" + postId;
+            location.href = "/post/detail/" + postId;
         };
 
         // 채팅방 만들어야함 ( 구매자 + 판매자 )

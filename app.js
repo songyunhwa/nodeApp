@@ -22,9 +22,9 @@ app.set('view engine', 'html');
 
 
 app.use(express.static(path.join(__dirname, 'public')));//static파일경로
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit:'50mb'}));
 //json으로 이루어진 request body 받을 수 있도록
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({extended: true, limit:'50mb'}));
 //post body 를 추출 . 중첩된 객체표현을 허용 안힘
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(session({

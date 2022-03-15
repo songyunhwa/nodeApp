@@ -1,0 +1,57 @@
+<!doctype html> 
+<html>
+<div>
+    <table>
+        <tbody>
+            <tr>
+                <td>제목</td>
+                <td><%= title %></td>
+            </tr>
+            <tr>
+                <td>내용</td>
+                <td><%= content %></td>
+            </tr>
+            <tr>
+                <td>사진</td>
+                <td>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+    <button id='updatePost' onClick="goPost()">수정</button>
+    <button id='deletePost' onClick="deletePost()">삭제</button>    
+    <button id='goBoard' onClick="goBoard()">게시판으로 가기</button>     
+</div>
+    <div>
+    </div>
+</div>
+</html>
+<script src='http://code.jquery.com/jquery-latest.js'></script>
+<script>
+    
+    window.onload = function() {
+    
+    let postId = <%= postId %>;
+
+    goPost = function() {
+        location.href = "/post/" + postId;
+    }
+
+    deletePost = function() {
+        $.ajax({
+            url: '/post/' + postId ,
+            dataType: 'json',
+            type: 'DELETE',
+            success: function(result) {
+                location.href = "/";
+            }
+        });
+    }
+
+    goBoard = function() {
+        location.href = "/";
+    }
+}
+</script>
+

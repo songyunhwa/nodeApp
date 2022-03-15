@@ -1,37 +1,32 @@
 <!doctype html> 
 <html>
 <div>
-    
+    <form method="POST" enctype="multipart/form-data" id="excelForm">
     <table>
         <tbody>
             <tr>
                 <td>제목</td>
-                <td><input type="text" id="title" @value="title"></input></td>
+                <td><input type="text" id="title" name="title" @value="title"></input></td>
             </tr>
             <tr>
                 <td>내용</td>
-                <td><input type="text" id="content" @value="content"></input></td>
+                <td><input type="text" id="content" name="content" @value="content"></input></td>
             </tr>
             <tr>
                 <td>사진</td>
                 <td>
-                    <form id="fileForm" method="post" enctype="multipart/form-data"> 
-                        <input type="file" id="file" multiple="true"> 
-                    </form>
+                    <input type="file" id="file" name="data"/>
                 </td>
                 <td>
-                    <button id='sendImage' onClick='sendImage()'>사진 저장</button>
+                    <div id="files" />
                 </td>
             </tr>
         </tbody>
     </table>
-    <div id="button">
-    </div>
-    <div>
-        
-        <button id="goBoard">게시판으로 가기</button> 
-    </div>
+</form>
 </div>
+<div><button id="goBoard">게시판으로 가기</button></div>
+<div id="button"></div>
 </html>
 <script src='http://code.jquery.com/jquery-latest.js'></script>
 <script>
@@ -42,83 +37,20 @@
     let postId = "<%= postId%>";
     let title = "<%= title %>";
     let content = "<%= content %>";
+    let image = "<%= image %>";
     let writerYn = "<%= writerYn %>";
 
     document.getElementById('title').value = title == "title" ? "" : title;
     document.getElementById('content').value = content == "content" ? "" : content;
-    
-    // 작성자일 경우 버튼 생성
-    if(writerYn == "true"){
-        $("#button").append("<button id='sendPost' onClick='sendPost()'>저장</button>");
-        if(postId != "-1") {
-            $("#button").append("<button id='deletePost' onClick='deletePost()'>삭제</button>");
-        }
+
+    if(postId != -1){
+        $("button").append("<button id='updatePost' onClick='updatePost()'>수정</button>");
+    }else {
+        $("button").append("<button id='sendPost' onClick='sendPost()' >전송</button>");
     }
-    
-    sendPost = function() {
-        /*
-        var image = document.getElementById("file");
-        if(image.length >0 && image != null) {
-            saveImage(image);
-        }*/
-
-        var title = document.getElementById('title').value;
-        var content = document.getElementById('content').value;
-
-        const data = {
-                  'title' : title, 
-                  'content' : content 
-                };
-
-        if(postId.length > 0 && postId != '-1') {
-            console.log("post");
-            $.ajax({
-            url: '/post/' + postId ,
-            dataType: 'json',
-            type: 'POST',
-            data: data,
-            success: function(result) {
-                alert("저장했습니다");
-            },
-            error: function(result) {
-                alert(result.data);
-            }
-            });
-        }else {
-            $.ajax({
-              url: '/post/',
-              dataType: 'json',
-              type: 'POST',
-              data: data,
-              success: function(result) {
-                alert("저장했습니다");
-              },
-              error: function(result) {
-                alert(result.data);
-            }
-            });
-        }
+    if(image.length >0){
+        $("#files").append("<div>" + image + "</div><bu");
     }
-
-    //saveImage = function() {
-    document.getElementById("sendImage").onclick = function() {
-        var image = $("#file")[0].files[0];
-        console.log(image);
-        $.ajax({
-              url: '/post/upload/one',
-              dataType: 'multipart/form-data',
-              type: 'POST',
-              img: image,
-              success: function(result) {
-                console.log(result);
-                alert("저장했습니다");
-              },
-              error: function(result) {
-                alert(result.data);
-            }
-            });
-    }
-
     deletePost = function() {
         $.ajax({
             url: '/post/' + postId ,
@@ -129,7 +61,83 @@
             }
         });
     }
+    
+    sendPost = function() {
+        if(document.getElementById('file').value != null && document.getElementById('file').value.length > 0){
+            var form = $('#excelForm')[0];
 
+            var formData = new FormData(form);
+            $.ajax({
+                url : '/post/upload',
+                type : 'POST',
+                enctype: 'multipart/form-data',
+                data : formData,
+                contentType : false,
+                processData : false        
+             }).done(function(data){
+                alert("전송되었습니다.");
+            });
+        }else {
+         
+            const data= {
+                'title': document.getElementById('title').value,
+                'content': document.getElementById('content').value,
+                'image' : image
+            };
+
+             $.ajax({
+            url: '/post' ,
+            dataType: 'json',
+            type: 'POST',
+            data: data,
+            success: function(result) {
+                alert("전송되었습니다.");
+            },
+            error: function(result){
+                alert("에러가 있습니다.");
+            }
+            });
+            
+        }
+    }
+
+    updatePost = function() {
+        if(document.getElementById('file').value != null && document.getElementById('file').value.length > 0){
+            var form = $('#excelForm')[0];
+
+            var formData = new FormData(form);
+            $.ajax({
+                url : '/post/update/' + postId,
+                type : 'POST',
+                enctype: 'multipart/form-data',
+                data : formData,
+                contentType : false,
+                processData : false        
+             }).done(function(data){
+                alert("전송되었습니다.");
+            });
+        }else {
+            const data= {
+                'title': document.getElementById('title').value,
+                'content': document.getElementById('content').value,
+                'image' : image
+            };
+
+             $.ajax({
+            url: '/post/' + postId ,
+            dataType: 'json',
+            type: 'POST',
+            data: data,
+            success: function(result) {
+                alert("전송되었습니다.");
+            },
+            error: function(result){
+                alert("에러가 있습니다.");
+            }
+            });
+            
+        }
+    }
 
     document.getElementById("goBoard").onclick = function() {
         location.href = "/";
