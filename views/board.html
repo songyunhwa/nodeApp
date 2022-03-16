@@ -1,18 +1,23 @@
 <!doctype html> 
 <html>
      <head> 
-        <div id="auth"></div>
-        <h1>목록</h1>
-        <table id="board">
-            <ul id="list">
-            </ul>
-        </table>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+        <div  class="board">
+            <div id="auth"></div>
+            <h1 class="display-1">목록</h1>
+        
+            <table id="board">
+                <ul id="list" class="list-group">
+                </ul>
+            </table>
       </body>
       <button id="sendPost">글쓰기</button>
+      </div>
     </head>
          
 <body> 
 <script src='http://code.jquery.com/jquery-latest.js'></script>
+<script src = "/js/bootstrap.min.js"></script>
 <script>
     window.onload = function() {
 
@@ -53,12 +58,12 @@
         addList = function(element){
             var temp = document.createElement('li');
             
-            temp.innerHTML = '<tr>'
+            temp.innerHTML = '<li class="list-group-item">'
                 + '<div onClick="goPost(' + element.id + ')"><td>' +element.title + '</td></div>'
                 + '<div><img src="C:\Users\82107\myApp\nodeApp\routes\images\"' + element.image + '"/></div>' 
                 + '<div><td>' + element.content + '</td></div>'
                 + '<div><td>' + element.writer + '</td></div>' 
-                + '<div><input type="button" id="chat" value="채팅하기" onclick="createChat(' + element.id + ')"></button></div>';
+                + '<div><input type="button" id="chat" value="채팅하기" onclick="createChat(' + element.id + ')"></button></div></li>';
             list.appendChild(temp);
         }
 
@@ -125,3 +130,10 @@
            }
     }
 </script>
+<style>
+    .board{
+        align:center;
+        text-align: center;
+        width: 80%;
+    }
+</style>

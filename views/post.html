@@ -18,15 +18,15 @@
                     <input type="file" id="file" name="data"/>
                 </td>
                 <td>
-                    <div id="files" />
+                    <div id="files" ></div>
                 </td>
             </tr>
         </tbody>
     </table>
 </form>
 </div>
-<div><button id="goBoard">게시판으로 가기</button></div>
 <div id="button"></div>
+<button id='goBoard' onClick='goBoard()'>게시판으로 가기</button>
 </html>
 <script src='http://code.jquery.com/jquery-latest.js'></script>
 <script>
@@ -44,10 +44,11 @@
     document.getElementById('content').value = content == "content" ? "" : content;
 
     if(postId != -1){
-        $("button").append("<button id='updatePost' onClick='updatePost()'>수정</button>");
+        $("#button").append("<button id='updatePost' onClick='updatePost()'>수정</button>");
     }else {
-        $("button").append("<button id='sendPost' onClick='sendPost()' >전송</button>");
+        $("#button").append("<button id='sendPost' onClick='sendPost()' >전송</button>");
     }
+
     if(image.length >0){
         $("#files").append("<div>" + image + "</div><bu");
     }
@@ -139,7 +140,7 @@
         }
     }
 
-    document.getElementById("goBoard").onclick = function() {
+    goBoard = function() {
         location.href = "/";
     }
 }

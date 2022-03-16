@@ -16,6 +16,9 @@ const chats = require('./models/chat');
 
 dotenv.config(); // 현재 디렉토리 위치한 환경변수 읽어냄.
 
+// 부트스트랩
+app.use('/js', express.static(__dirname + '/node_modules/bootstrap/dist/js')); // redirect bootstrap JS
+app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css')); // redirect CSS bootstrap
 
 app.set('port', process.env.PORT || 8081);
 app.set('view engine', 'html');

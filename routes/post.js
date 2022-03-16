@@ -40,7 +40,8 @@ router.get('/detail/:id',  async(req, res, next) =>{
             postId : req.params.id,
             title : result.title,
             content: result.content,
-            writerYn : writerYn
+            writerYn : writerYn,
+            image : result.image
         });
     })
     .catch(err => {
